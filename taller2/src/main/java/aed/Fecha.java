@@ -6,14 +6,14 @@ public class Fecha {
 
     public Fecha(int dia, int mes) {
         // Implementar
-        _dia = dia;
-        _mes = mes;
+        _dia = new Integer(dia);
+        _mes = new Integer(mes);
     }
 
     public Fecha(Fecha fecha) {
         // Implementar
-        this._dia = fecha.dia();
-        this._mes = fecha.mes();
+        this._dia = new Integer(fecha.dia());
+        this._mes = new Integer(fecha.mes());
     }
 
     public Integer dia() {

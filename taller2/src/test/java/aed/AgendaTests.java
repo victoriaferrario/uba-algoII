@@ -120,7 +120,6 @@ public class AgendaTests {
         assertEquals(h, recordatorio.horario());
         assertEquals(f, recordatorio.fecha());
         assertEquals(mensaje, recordatorio.mensaje());
-
         // Evitar aliasing.
         f.incrementarDia();
         Fecha f2 = recordatorio.fecha();

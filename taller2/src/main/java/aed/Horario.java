@@ -13,6 +13,12 @@ public class Horario {
         return _hora;
     }
 
+    public Horario(Horario horario) {
+        // Implementar
+        this._minutos = horario.minutos();
+        this._hora = horario.hora();
+    }
+
     public int minutos() {
         return _minutos;
     }
