@@ -1,0 +1,383 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage[left=2.5cm,top=3cm,right=2.5cm,bottom=3cm,bindingoffset=0.5cm]{geometry}
+\usepackage{macros/AEDLogica, macros/AEDEspecificacion, macros/AEDTADs}
+\usepackage{caratula}
+
+
+\titulo{Trabajo práctico}
+\subtitulo{Examen de Residencia Version GPT5 Iroquai}
+
+\fecha{\today}
+
+\materia{Algoritmos y Estructuras de Datos}
+\grupo{Algoritmia} 
+
+\integrante{Lopez Abraham, Ignacio Matias}{415/25}{ignaciolopezabraham05@gmail.com}
+% \integrante{Apellido, Nombre2}{002/01}{email2@dominio.com} %
+\integrante{Ferrario, Victoria}{395/25}{vickyferrario56@gmail.com}
+% \integrante{Apellido, Nombre2}{002/01}{email2@dominio.com} %
+\integrante{Ramdan, Matias}{326/21}{matias.ramdan@gmail.com}
+% \integrante{Apellido, Nombre2}{002/01}{email2@dominio.com} %
+\integrante{Potenzoni, Mateo}{452/25}{matepotenzoni@gmail.com}
+
+
+% Declaramos donde van a estar las figuras
+% No es obligatorio, pero suele ser comodo
+\graphicspath{{../static/}}
+
+% Asi pueden escribir nuevos comandos. 
+% Este por ejemplo asegura q los nombres 
+% que figuren con una tipografia diferenciada  
+\newcommand{\Tipo}[1]{\mathsf{#1}} 
+% la sintaxis es \newcommand{\nombreDeLaMacro}[cantidadDeParametros]{Lo que va ser remplazado por el macro} 
+\newcommand{\norm}[1]{\vert #1\vert}
+
+
+
+\begin{document}
+
+\maketitle
+
+\noindent $Solucion\ ES\ \Tipo{\seq{\Z}}$ \\
+$Nota\ ES\ \Tipo{\Z}$ \\
+$Estudiante\ ES\ \Tipo{\struct{Solucion: Solucion, Posicion: tuple\tupla{\Z,\Z}, EnAula: \bool}}$ \\
+\\
+\begin{tad}{EdR}
+
+\obs{SolucionCanonica}{Solucion}
+\\
+\obs{Estudiantes}{\conj{Estudiante}}
+\\
+\obs{ListaCopiados}{\conj{Estudiante}}
+\\
+\obs{FilaColumnaAula}{\Z}
+\\
+
+\begin{proc}{EdR}{\In Filas: \Z, \In SolucionCanonica: \Tipo{Solucion}, \In CantidadEstudiantes: \Z}{
+\Tipo{ EdR }}
+    \requiereLargo{(CantidadEstudiantes > 0 \land Filas > 0) \yLuego 
+    \\ 
+    entranEstudiantes(filas, CantidadEstudiantes) \land 
+    \\
+    solucionCumple(SolucionCanonica)}
+    \aseguraLargo{res.SolucionCanonica = SolucionCanonica \land
+    \\
+    res.FilaColumnaAulas = Filas \land res.Estudiantes = \conj{Estudiante} \land
+    \\
+    EstudiantesCumple(res.Estudiante, CantidadEstudiantes, SolucionCanonica, filas) \land
+    res.ListaCopiados = \conj{Estudiante} \land \norm{res.ListaCopiados} = 0}
+\end{proc}
+
+
+\predLargo{entranEstudiantes}{filas: \Z, cantidadEstudiantes: \Z}{((filas/2) * filas) \geq cantidadEstudiantes}
+
+\predLargo{solucionCumple}{solucionCanonica: \Tipo{Solucion}}{
+    \paraTodoLargo{punto}{\Z}{(0 \leq punto < \norm{solucionCanonica}) \implicaLuego ((solucionCanonica[punto]) \geq 0 \land (solucionCanonica[punto]) \leq 9 )}
+}
+
+\predLargo{estudiantesCumple}{estudiantes: \seq{\Tipo{Estudiante}}, cantidadEstudiantes: \Z, solucion: \Tipo{Solucion}, filas: \Z}{
+    \norm{estudiantes} = cantidadEstudiantes \yLuego \\
+    \paraTodoLargo{estudiante}{\Tipo{Estudiante}}{ (estudiante \in estudiantes) \implicaLuego (\norm{estudiante.Solucion} = \norm{solucion}) \land \\
+    \paraTodoLargo{punto}{\Z}{(0 \leq punto < \norm{estudiante.Solucion}) \implica estudiante.Solucion[punto] = -1} \land \\
+     (0 \leq estudiante.Posicion_1 < filas) \land (0 \leq estudiante.Posicion_2 < filas) \land \\
+    \paraTodoLargo{estudiante'}{\Tipo{Estudiante}}{estudiante' \in estudiantes \implicaLuego (estudiante' \neq estudiante \land \\
+    estudiante'.Posicion \neq estudiante.Posicion)} \land (estudiante'.Posicion_1 = estudiante.Posicion_1) \implica \\
+    \norm{estudiante'.Posicion_2 - estudiante.Posicion_2} \geq 2
+    }
+}
+
+\begin{proc}{igualdad}
+{\In EdR1: \Tipo{EdR}, \In EdR2: \Tipo{EdR}}{}
+    \requiere{True}
+    \aseguraLargo{
+        EdR1.SolCanonica = EdR2.SolCanonica \land \\
+        EdR1.Estudiantes = EdR2.Estudiantes \land \\
+        EdR1.ListaCopiados = EdR2.ListaCopiados \land \\
+        EdR1.FilaColumnaAula = EdR2.FilaColumnaAula 
+    }
+\end{proc}
+
+\begin{proc}{copiarse} 
+{\Inout EdR: \Tipo{EdR}, \In estudianteCopiado: \Tipo{Estudiante}, \In estudianteCopiador: \Tipo{Estudiante}, \In puntoCopiado: \Z}{}
+    \requiereLargo{ EdR = EdR_0 \land \\
+        (estudianteCopiado \in EdR.Estudiantes \land\ estudianteCopiador \in EdR.Estudiantes) \land 
+        (estudianteCopiado.enAula = True \land estudianteCopiador.enAula = True) \yLuego \\
+        CopiadorEnRango(estudianteCopiado, estudianteCopiador) \land \\
+        puntoValidoASerCopiado(EdR, puntoCopiado, estudianteCopiado, estudianteCopiador)
+    }
+    \aseguraLargo{
+        copiadorCambiaSoloPuntoCopiado(EdR, puntoCopiado, \\ estudianteCopiador, estudianteCopiado) \land \\
+        EdR.SolCanonica = EdR_0.SolCanonica \land \\
+        EdR.ListaCopiados = EdR_0.ListaCopiados \land \\
+        restoEstudiantesNoCambia(EdR, EdR_0,estudianteCopiador)
+    }
+\end{proc}
+
+
+\predLargo{CopiadorEnRango}{estudianteCopiado: \Tipo{Estudiante}, estudianteCopiador: \Tipo{Estudiante}, fila: \Z}{
+    \Big(
+        (estudianteCopiador.posicion_1 \neq 0) \land \\
+        \big( estudianteCopiador.posicion_2 = estudianteCopiado.posicion_2 \land \\
+              estudianteCopiador.posicion_1 = estudianteCopiado.posicion_1 + 1
+        \big)  \\
+    \Big)
+    \lor
+    \Big(
+        \\(fila > 2) \land  \\
+        \big(
+            (estudianteCopiador.posicion_2 = 0 \land \\
+                estudianteCopiador.posicion_2 + 2 = estudianteCopiado.posicion_2) \\
+            \lor\\ 
+            (estudianteCopiador.posicion_2 = fila - 1 \land\\ 
+                estudianteCopiador.posicion_2 - 2 = estudianteCopiado.posicion_2) \\
+            \lor \\ 
+            (|estudianteCopiador.posicion_2 - estudianteCopiado.posicion_2| = 2  \land  
+        \big)
+    \Big)
+}
+
+\predLargo{puntoValidoASerCopiado}{EdR: EdR, p: \Z, estudianteCopiado: Estudiante, \\ estudianteCopiador: Estudiante}{
+    (0 < p \leq \norm{EdR.SolCanonica}) \yLuego \\
+    \existe{estudiante}{Estudiante}{
+        estudiante \in EdR.Estudiantes \yLuego \\ 
+        (estudiante = estudianteCopiado \land (0 \leq estudiante.Solucion[p] \leq 9))
+    } \\ \land \\
+    \existe{estudiante'}{Estudiante}{
+        estudiante' \in EdR.Estudiantes \yLuego \\
+        (estudiante' = estudianteCopiador \land estudiante'.Solucion = -1)
+    }
+}
+
+\predLargo{copiadorCambiaSoloPuntoCopiado}{EdR: \Tipo{EdR}, p: \Z, estudianteCopiado: \Tipo{Estudiante}, \\ estudianteCopiador: \Tipo{Estudiante}}{
+    \existe{estudiante}{\Tipo{Estudiante}}{
+        estudiante \in EdR.Estudiantes \yLuego \\
+        (
+            (estudiante.Posicion = estudianteCopiador.Posicion) \land \\
+            (estudiante.enAula = estudianteCopiado.enAula) \yLuego \\
+            \existe {estudiante'}{\Tipo{Estudiante}}{
+                estudiante' \in EdR.Estudiantes \yLuego \\
+                (estudiante' = estudianteCopiado \land \\
+                estudiante.Solucion = setAt(estudianteCopiador.Solucion, (p),\\ estudiante'.Solucion[p])
+                )
+            }
+        )
+    }
+}
+
+\predLargo{restoEstudiantesNoCambia}{Edr_0: \Tipo{Edr}, Edr: \Tipo{Edr}, estudianteQueNoCambia: \Tipo{Estudiante}}{
+    \norm{Edr_0} = \norm{Edr} \yLuego \\
+    \paraTodoLargo{estudiante}{\Tipo{Estudiante}}{
+        (estudiante \in Edr_0.estudiantes \land estudiante \neq estudianteQueNoCambia)
+        \implicaLuego (estudiante \in Edr_0.estudiantes)
+    }
+}
+
+
+\begin{proc}{consultarDarkWeb}
+{\In solucionDarkWeb: \Tipo{Solucion}, \Inout EdR : \Tipo{EdR}}{}
+    \requiereLargo{SolucionCumple(solucionDarkWeb) \land \norm{solucionDarkWeb} = \norm{EdR.SolucionCanonica} \land EdR = EdR_0}
+    \aseguraLargo{consultaronDarkWeb(EdR,solucionDarkWeb) \land 
+    \\
+    \norm{EdR.Estudiantes} = \norm{EdR_0.Estudiantes} \land
+    \\
+    EdR.SolucionCanonica = EdR_0.SolucionCanonica \land 
+    \\
+    EdR.ListaCopiados = EdR_0.ListaCopiados \land
+    \\
+    EdR.FilaColumnaAula = EdR_0.FilaColumnaAula \land
+    \\
+     \paraTodoLargo{estudiante}{\Tipo{Estudiantes}}{estudiante \in EdR_0.Estudiantes \implica estudiante \in EdR.Estudiantes \lor 
+    \\
+    cambioElEstudiante(EdR,solucionDarkWeb,estudiante)}}
+\end{proc}
+
+\predLargo{consultaronDarkWeb}{EdR : \Tipo{EdR}, solucionDarkWeb: \Tipo{Solucion}}{
+    \existeLargo{conjuntoEstudiantes}{\conj{\Tipo{Estudiante}}}{
+        (conjuntoEstudiantes \in EdR.Estudiantes) \land 
+        \\
+        (0 < \norm{conjuntoEstudiantes} < \norm{EdR.Estudiantes}) \land
+        \\
+         \paraTodoLargo{estudiante}{\Tipo{Estudiante}}{estudiante \in conjuntoEstudiantes \implica estudiante.Solucion = solucionDarkWeb} 
+    }
+}
+ 
+\pagebreak
+
+\predLargo {cambioElEstudiante}{Edr: \Tipo{Edr}, nuevaSolucion: \Tipo{Solucion}, estudiante: \Tipo{Estudiante}}{
+    \existe {estudiante} {Edr.Estudiantes} { (estudiante.EnAula = estudiante.EnAula) \yLuego  (estudiante.Posicion = estudiante.Posicion) \yLuego 
+        (estudiante.Solucion = nuevaSolucion)
+    }
+}
+
+
+\begin{proc}{resolver}
+{\Inout EdR: \Tipo{EdR}, \In pasos: \seq{Solucion}, \In puntoAResolver: tuple\tupla{\Z,\Z}, \\  \In estudiante: \Tipo{Estudiante}}{\seq{Solucion}}
+    \requiereLargo{
+        EdR = Edr_0 \land \norm{pasos} \geq 0 \land estudiante.enAula = True \yLuego \\
+        EstudianteEnEdr(EdR.Estudiantes, estudiante) \land \\
+        examenVacio(estudiante.solucion) \land \\  
+        pasosValidos(pasos, EdR.SolucionCanonica) \land \\
+        \neg puntoResuelto(pasos[\norm{pasos}-1], puntoAResolver)
+    }
+    \aseguraLargo{
+        todoIgualMenosEstudiantes(EdR, EdR_0) \land \\
+        res = pasos ++ setAt(pasos[\norm{pasos}-1], puntoAResolver_1,puntoAResolver_2) \land \\
+        cambioRespuestaEstudiante(EdR_0, EdR, res[\norm{res}-1], estudiante) \land \\
+        restoEstudiantesNoCambia(EdR_0, EdR, estudiante)
+    }
+\end{proc}
+
+\predLargo{examenVacio}{examen: \Tipo{Solucion}}{
+    \paraTodo{paso}{\Z}{0 \leq paso < \norm{examen} \implicaLuego examen[paso] = -1}
+}
+
+\predLargo{pasosValidos}{pasos: \seq{\Tipo{Solucion}}, solucion: \Tipo{Solucion}}{
+    \paraTodo{i}{\Z}{0 \leq i < \norm{pasos} \implicaLuego( \norm{pasos} = \norm{solucion} \land cantidadPuntosHechos(pasos[i]) = i )}
+}
+
+\predLargo{cambioRespuestaEstudiante}{EdR: \Tipo{EdR}, nuevaSolucion: \Tipo{Solucion}, estudiante: \Tipo{Estudiante}}{
+    \existe{ estudiante'}{\Tipo{Estudiante}}{estudiante' \in EdR.Estudiantes \land \\
+    estudiante'.EnAula = estudiante.EnAula \land \\
+    estudiante'.Posicion = estudiante.Posicion \land \\
+    estudiante'.Solucion = nuevaSolucion}
+}
+
+\predLargo{todoIgualMenosEstudiantes}{EdR1: \Tipo{Edr}, EdR2: \Tipo{EdR}}{
+    EdR1.FilaColumnaAula = EdR2.FilaColumnaAula \land \\
+    EdR1.ListaCopiados = EdR2.ListaCopiados \land \\
+    EdR1.SolucionCanonica = EdR2.SolucionCanonica
+}
+
+\aux{puntoResuelto}{examen: \Tipo{Solucion}, punto: \Z}{\bool}{
+    0 \leq examen[punto] \leq 9
+}
+
+\aux{cantidadPuntosHechos}{solucion: \Tipo{Solucion}}{\Z}{ \\ \sum_{i=0}^{\norm{solucion}-1}  \IfThenElse{0 \leq solucion[i] \leq 9}{1}{0}}
+
+\pagebreak
+
+\begin{proc}{entregar}
+{\Inout EdR : \Tipo{EdR}, \In estudianteEntregar : \Tipo{Estudiante}}{}
+    \requiereLargo{
+        estudianteEntregar \in EdR.Estudiantes \land
+        estudianteEntregar.EnAula = True
+    }
+    \aseguraLargo{
+        SaleEstudiante(EdR, EdR_0, estudianteEntregar) \land \\
+        restoEstudiantesNoCambia(EdR_0, EdR, estudianteEntregar) \land \\
+        EdR.SolucionCanonica = EdR_0.SolucionCanonica \land\\
+        EdR.ListaCopiados = EdR_0.ListaCopiados \land\\
+        EdR.FilaColumnaAula = EdR_0.FilaColumnaAula
+    }
+\end{proc}
+
+\predLargo{SaleEstudiante}{EdR: \Tipo{EdR}, estudianteEntregar: \Tipo{Estudiante}}{
+    \existe{est}{\Tipo{Estudiante}}{
+        est \in EdR.Estudiantes \land 
+        (est.Posicion = estudianteEntregar.Posicion) \land
+        (est.Solucion = estudianteEntregar.Solucion) \land
+        (est.EnAula = False)
+    }
+}
+
+
+\begin{proc}{chequearCopias}
+{\Inout EdR: \Tipo{EdR}}{\seq{\Tipo{Estudiante}}}
+    \requiereLargo{
+        EdR = EdR_0 \land
+        terminoExamen(EdR.Estudiantes)
+    }
+    \aseguraLargo{
+        noHayRepetidos(res) \land
+        \\
+        \paraTodoLargo{estudiante}{Estudiante}{
+            estudiante \in EdR.Estudiantes \implica \\
+            \Big(
+                seCopioEnRango(estudiante, EdR.Estudiantes)
+                \lor \\
+                seCopioDarkWeb(estudiante, EdR.Estudiantes)
+            \Big)
+            \leftrightarrow
+            estudiante \in res
+        }
+        \land
+        todosIgualesMenosListaCopiados(EdR_0, EdR)
+        \land
+        EdR.ListaCopiados = res
+    }
+\end{proc}
+
+\predLargo{terminoExamen}{estudiantes: \conj{\Tipo{Estudiante}}}{
+    \paraTodoLargo{estudiante}{\Tipo{Estudiante}}{estudiante \in estudiantes \implica estudiante.EnAula = False}
+}
+
+\predLargo{seCopioEnRango}{estudiante: \Tipo{Estudiante}, estudiantes: \conj{\Tipo{Estudiante}}}{
+    \existeLargo{estudianteCopiado}{\Tipo{Estudiante}}{estudianteCopiado \in estudiantes \land \\
+    CopiadorEnRango(estudianteCopiado, estudiante) \land \\
+    cantidadDeIgualesEnSeq(estudiante.Solucion, estudianteCopiado.Solucion) \geq ((\norm{estudianteCopiado} / 10) * 6)
+    }
+}
+
+\predLargo{seCopioDarkWeb}{estudiante: \Tipo{Estudiante}, estudiantes: \conj{Estudiante}}{
+    \existeLargo{estudiantesCopiados}{\conj{Estudiante}}{
+        estudiantesCopiados \subset estudiantes \land estudiante \in estudiantesCopiados \implicaLuego
+        \paraTodoLargo{estudianteCopiado}{\Tipo{Estudiante}}{
+            estudianteCopiado \in estudiantesCopiados \implica \\
+            mismaSolucion(estudianteCopiado, estudiante)
+        }
+        \land
+        \norm{estudiantesCopiados} \geq \norm{estudiantes} / 4
+    }
+}
+
+\predLargo{todosIgualesMenosListaCopiados}{EdR1: \Tipo{EdR}, EdR2: \Tipo{EdR}}{
+    EdR1.SolucionCanonica = EdR2.SolucionCanonica \land \\
+    EdR1.Estudiantes = EdR2.Estudiantes \land \\
+    EdR1.FilaColumnaAula = EdR2.FilaColumnaAula
+}
+
+\predLargo{noHayRepetidos}{secuencia: \seq{\Tipo{T}}}{
+    \paraTodo{i}{\Z}{\paraTodo{j}{\Z}{((0 \leq i < \norm{secuencia}) \land (0 \leq j < \norm{secuencia}) \land i \neq j) \implicaLuego secuencia[i]_1 \neq secuencia[j]_1}}
+}
+
+\auxLargo{mismaSolucion}{estudiante1: \Tipo{Estudiante}, estudiante2: \Tipo{Estudiante}}{\bool}{
+    estudiante1.Solucion = estudiante2.Solucion
+}
+
+\auxLargo{cantidadDeIgualesEnSeq}{elemento: \Tipo{T}, secuencia: \seq{\Tipo{T}}}{\Z}{\sum_{i=0}^{\norm{secuencia}-1}  \IfThenElse{elemento = secuencia[i]}{1}{0}}
+
+
+\begin{proc}{corregir}
+{\In EdR: \Tipo{EdR}}{
+\Tipo{ \seq{tuple\tupla{Estudiante,{\R}}}}
+}
+    \requiere{terminoExamen(EdR.Estudiantes)}
+    \aseguraLargo{listaSolucionNoContieneNombresDeMas(res, EdR) \land
+    \\
+    noHayRepetidos(res) \land
+    \\
+    \paraTodoLargo{estudiante}{\Tipo{Estudiante}} {(estudiante \in EdR.Estudiantes \land  \neg (estudiante \in EdR.ListaCopiados) ) 
+    \\
+    \implica \existeLargo{i}{\Z}{(0 \leq i < \norm{res}) \yLuego (res[i]_1 = estudiante) \land 
+    \\
+    (res[i]_2 = notaDelEstudiante(estudiante.Solucion, EdR.SolCanonica)) } }}
+\end{proc}
+
+\predLargo{listaSolucionNoContieneNombresDeMas}{res: \seq{\Tipo{Estudiante},{\R}}, EdR: \Tipo{EdR}}{
+    \paraTodo{i}{\Z}{ (0 \leq i < \norm{res}) \implicaLuego 
+    \\
+    ((res[i]_1 \in EdR.Estudiantes) \land  \neg (res[i]_1 \in EdR.ListaCopiados)  \land \neg (estaEnElAula(res[i]_1)))}
+}
+
+\auxLargo{notaDelEstudiante}{solucion: \Tipo{Solucion}, solucionCanonica: \Tipo{Solucion}}{\R}{\sum_{j=0}^{\norm{solucion}} \IfThenElse{solucion[j] = solucionCanonica[j]}{1}{0}\cdot 10/\norm{solucion}}
+
+\end{tad}
+
+\noindent\rule{\textwidth}{0.4pt}
+\textbf{Aclaraciones:} Consideramos los puntos de Solucion enumerados, en orden, desde el \textit{0}. El valor de un punto todavia no resuelto es \textit{-1}.
+
+
+
+\end{document}
