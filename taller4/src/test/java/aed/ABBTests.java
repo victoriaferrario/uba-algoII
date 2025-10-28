@@ -145,6 +145,9 @@ class ABBTests {
         conjunto.insertar(8);
         conjunto.eliminar(7);
 
+
+    
+
         assertFalse(conjunto.pertenece(7));
         assertEquals(4, conjunto.cardinal());
         assertEquals(4, conjunto.minimo());
